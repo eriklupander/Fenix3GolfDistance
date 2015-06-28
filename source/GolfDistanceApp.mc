@@ -1,5 +1,6 @@
 using Toybox.Application as App;
 using Toybox.WatchUi as Ui;
+using Toybox.System as Sys;
 
 class GolfDistanceApp extends App.AppBase {
 
@@ -19,9 +20,28 @@ class GolfDistanceApp extends App.AppBase {
 }
 
 class KeyDelegate extends Ui.InputDelegate {
+
+	function onHold(key) {
+		Sys.println("onHold");
+		Ui.pushView(new Rez.Menus.MainMenu(), new GolfDistanceMenuDelegate(), Ui.SLIDE_UP);
+        return true;
+	}
+	
+	function onRelease(key) {
+		Sys.println("onRelease");
+		Ui.pushView(new Rez.Menus.MainMenu(), new GolfDistanceMenuDelegate(), Ui.SLIDE_UP);
+        return true;
+	}
+	
 	function onKey(key) {
+	
+		if (key.getKey() == Ui.KEY_MENU) {
+			Ui.pushView(new Rez.Menus.MainMenu(), new GolfDistanceMenuDelegate(), Ui.SLIDE_UP);
+	       return true;
+		}
+		
 		if (key.getKey() == Ui.KEY_UP) {
-			if (currentHoleIdx < 17) {
+			if (currentHoleIdx < courses[currentCourseIdx]["holeCount"]-1) {
 		    	currentHoleIdx++;
 		    } else {
 		    	currentHoleIdx = 0;
@@ -33,7 +53,7 @@ class KeyDelegate extends Ui.InputDelegate {
 			if (currentHoleIdx > 0) {
     	 		currentHoleIdx--;
 			} else {
-		    	 currentHoleIdx = 17;
+		    	 currentHoleIdx = courses[currentCourseIdx]["holeCount"]-1;
 	    	}
 			return true;
 		}
@@ -41,10 +61,10 @@ class KeyDelegate extends Ui.InputDelegate {
 	}
 }	
 
-class GolfDistanceDelegate extends Ui.BehaviorDelegate {
+//class GolfDistanceDelegate extends Ui.BehaviorDelegate {
 
-    function onMenu() {
-        Ui.pushView(new Rez.Menus.MainMenu(), new GolfDistanceMenuDelegate(), Ui.SLIDE_UP);
-        return true;
-    }
-}
+  //  function onMenu() {
+   //     Ui.pushView(new Rez.Menus.MainMenu(), new GolfDistanceMenuDelegate(), Ui.SLIDE_UP);
+    //    return true;
+   // }
+//}

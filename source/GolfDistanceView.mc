@@ -5,8 +5,6 @@ using Toybox.Lang as Lang;
 using Toybox.Position as Position;
 using Toybox.Math as Math;
 
-var currentHoleIdx = 0; // 0-17
-
 // Sotenas GK gul/rod test data.
 var testCourse = [
 	{"hcp" => 7, "par" => 4, "lat" => 58.433293, "lon" => 11.376316},
@@ -29,6 +27,28 @@ var testCourse = [
 	{"hcp" => 10, "par" => 5, "lat" => 58.432148, "lon" => 11.372480}, 
 	{"hcp" => 8, "par" => 4, "lat" => 58.435491, "lon" => 11.378662}
 ];
+
+var testCourse2 = [
+	{"hcp" => 7, "par" => 4, "lat" => 58.438253, "lon" => 11.377348}, // 58.438253, 11.377348
+	{"hcp" => 13, "par" => 4, "lat" => 58.440298, "lon" => 11.374679},// 58.440298, 11.374679
+	{"hcp" => 3, "par" => 5, "lat" => 58.443850, "lon" => 11.368959}, //  58.443850, 11.368959
+	{"hcp" => 9, "par" => 5, "lat" => 58.446957, "lon" => 11.364698}, //  58.446957, 11.364698
+	{"hcp" => 15, "par" => 3, "lat" => 58.444598, "lon" => 11.366344}, // 58.444598, 11.366344
+	{"hcp" => 5, "par" => 4, "lat" => 58.442465, "lon" => 11.368424},  // 58.442465, 11.368424
+	{"hcp" => 11, "par" => 4, "lat" => 58.444430, "lon" => 11.365285}, // 58.444430, 11.365285
+	{"hcp" => 17, "par" => 5, "lat" => 58.440557, "lon" => 11.369183}, // 58.440557, 11.369183
+	{"hcp" => 1, "par" => 3, "lat" => 58.438901, "lon" => 11.375197}   // 58.438901, 11.375197
+];
+
+var courses = [
+	{"id" => 0, "name" => "Sotenas GK Gul/Rod", "holeCount" => 18, "holes" => testCourse},
+	{"id" => 1, "name" => "Sotenas GK Bla", "holeCount" => 9, "holes" => testCourse2}	
+];
+
+
+var currentHoleIdx = 0; // 0-17
+var currentCourseIdx = 0;
+ 
 class GolfDistanceView extends Ui.View {
 
 	var posnInfo = null;
@@ -60,15 +80,19 @@ class GolfDistanceView extends Ui.View {
         	var lat = posnInfo.position.toDegrees()[0];
         	var lon = posnInfo.position.toDegrees()[1];
             
-            string = "" + getDistance(lon.toFloat(), lat.toFloat(), testCourse[currentHoleIdx]["lon"], testCourse[currentHoleIdx]["lat"]);
+            string = "" + getDistance(lon.toFloat(), lat.toFloat(), 
+            	courses[currentCourseIdx]["holes"][currentHoleIdx]["lon"], 
+            	courses[currentCourseIdx]["holes"][currentHoleIdx]["lat"]);
             dc.drawText( (dc.getWidth() / 2), ((dc.getHeight() / 5) ), Gfx.FONT_NUMBER_THAI_HOT, string, Gfx.TEXT_JUSTIFY_CENTER );
         }
         else {
             dc.drawText( (dc.getWidth() / 2), (dc.getHeight() / 2), Gfx.FONT_SMALL, "No position info", Gfx.TEXT_JUSTIFY_CENTER );
         }
-        dc.drawText( (dc.getWidth() / 4), dc.getHeight() - (dc.getHeight() / 4), Gfx.FONT_TINY, "Par " + testCourse[currentHoleIdx]["par"], Gfx.TEXT_JUSTIFY_CENTER ); 
+        dc.drawText( (dc.getWidth() / 2), (dc.getHeight() / 6), Gfx.FONT_XTINY, "" + courses[currentCourseIdx]["name"], Gfx.TEXT_JUSTIFY_CENTER ); 
         
-        dc.drawText( dc.getWidth() - (dc.getWidth() / 4), dc.getHeight() - (dc.getHeight() / 4), Gfx.FONT_TINY, "Hcp " + testCourse[currentHoleIdx]["hcp"], Gfx.TEXT_JUSTIFY_CENTER ); 
+        dc.drawText( (dc.getWidth() / 4), dc.getHeight() - (dc.getHeight() / 4), Gfx.FONT_TINY, "Par " + courses[currentCourseIdx]["holes"][currentHoleIdx]["par"], Gfx.TEXT_JUSTIFY_CENTER ); 
+        
+        dc.drawText( dc.getWidth() - (dc.getWidth() / 4), dc.getHeight() - (dc.getHeight() / 4), Gfx.FONT_TINY, "Hcp " + courses[currentCourseIdx]["holes"][currentHoleIdx]["hcp"], Gfx.TEXT_JUSTIFY_CENTER ); 
         
         dc.drawText( (dc.getWidth() / 2), dc.getHeight() - (dc.getHeight() / 8), Gfx.FONT_TINY, "Hole " + (currentHoleIdx+1), Gfx.TEXT_JUSTIFY_CENTER ); 
     }
