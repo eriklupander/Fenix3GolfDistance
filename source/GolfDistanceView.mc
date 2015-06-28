@@ -5,6 +5,13 @@ using Toybox.Lang as Lang;
 using Toybox.Position as Position;
 using Toybox.Math as Math;
 
+// 198.3
+var test1 = [58.435349, 11.378371]; // 58.435349, 11.378371
+var test2 = [58.433432, 11.378533];
+
+// 1 to 3 = 256.7
+var test3 = [58.434504, 11.374378];
+
 // Sotenas GK gul/rod test data.
 var testCourse = [
 	{"hcp" => 7, "par" => 4, "lat" => 58.433293, "lon" => 11.376316},
@@ -52,7 +59,7 @@ var currentCourseIdx = 0;
 class GolfDistanceView extends Ui.View {
 
 	var posnInfo = null;
-	
+	var R = 6371000; // Meters
 
     //! Load your resources here
     function onLayout(dc) {
@@ -70,8 +77,7 @@ class GolfDistanceView extends Ui.View {
     function onUpdate(dc) {
         // Call the parent onUpdate function to redraw the layout
         //View.onUpdate(dc);
-		var string;
-
+		
         // Set background color
         dc.setColor( Gfx.COLOR_TRANSPARENT, Gfx.COLOR_BLACK );
         dc.clear();
@@ -80,21 +86,20 @@ class GolfDistanceView extends Ui.View {
         	var lat = posnInfo.position.toDegrees()[0];
         	var lon = posnInfo.position.toDegrees()[1];
             
-            string = "" + getDistance(lon.toFloat(), lat.toFloat(), 
+            var distanceStr = "" + dist(lon.toFloat(), lat.toFloat(), 
             	courses[currentCourseIdx]["holes"][currentHoleIdx]["lon"], 
             	courses[currentCourseIdx]["holes"][currentHoleIdx]["lat"]);
-            dc.drawText( (dc.getWidth() / 2), ((dc.getHeight() / 5) ), Gfx.FONT_NUMBER_THAI_HOT, string, Gfx.TEXT_JUSTIFY_CENTER );
+            
+            dc.drawText( (dc.getWidth() / 2), ((dc.getHeight() / 5) ), Gfx.FONT_NUMBER_THAI_HOT, distanceStr, Gfx.TEXT_JUSTIFY_CENTER );
         }
         else {
-            dc.drawText( (dc.getWidth() / 2), (dc.getHeight() / 2), Gfx.FONT_SMALL, "No position info", Gfx.TEXT_JUSTIFY_CENTER );
+            dc.drawText( (dc.getWidth() / 2), (dc.getHeight() / 2), Gfx.FONT_SMALL, "Waiting for GPS position...", Gfx.TEXT_JUSTIFY_CENTER );
         }
+        
         dc.drawText( (dc.getWidth() / 2), (dc.getHeight() / 6), Gfx.FONT_XTINY, "" + courses[currentCourseIdx]["name"], Gfx.TEXT_JUSTIFY_CENTER ); 
-        
         dc.drawText( (dc.getWidth() / 4), dc.getHeight() - (dc.getHeight() / 4), Gfx.FONT_TINY, "Par " + courses[currentCourseIdx]["holes"][currentHoleIdx]["par"], Gfx.TEXT_JUSTIFY_CENTER ); 
-        
-        dc.drawText( dc.getWidth() - (dc.getWidth() / 4), dc.getHeight() - (dc.getHeight() / 4), Gfx.FONT_TINY, "Hcp " + courses[currentCourseIdx]["holes"][currentHoleIdx]["hcp"], Gfx.TEXT_JUSTIFY_CENTER ); 
-        
-        dc.drawText( (dc.getWidth() / 2), dc.getHeight() - (dc.getHeight() / 8), Gfx.FONT_TINY, "Hole " + (currentHoleIdx+1), Gfx.TEXT_JUSTIFY_CENTER ); 
+        dc.drawText( dc.getWidth() - (dc.getWidth() / 4), dc.getHeight() - (dc.getHeight() / 4), Gfx.FONT_TINY, "Hcp " + courses[currentCourseIdx]["holes"][currentHoleIdx]["hcp"], Gfx.TEXT_JUSTIFY_CENTER );
+        dc.drawText( (dc.getWidth() / 2), dc.getHeight() - (dc.getHeight() / 8), Gfx.FONT_TINY, "Hole " + (currentHoleIdx+1), Gfx.TEXT_JUSTIFY_CENTER );         	
     }
 
     //! Called when this View is removed from the screen. Save the
@@ -109,11 +114,20 @@ class GolfDistanceView extends Ui.View {
         Ui.requestUpdate();
     }
     
-    function getDistance(lon, lat, lon2, lat2) {
-		var xDiff = lon2 - lon;
-		var yDiff = lat2 - lat;		
-		var dist = Math.sqrt( (xDiff*xDiff) + (yDiff*yDiff) ) * 100000;
-
-		return dist.format("%d");
-    } 
+    
+    // Calculates the equirectangular distance. For golf shot distances it's accurate enough.
+	// Note that coords are entered in decimal format and then converted to radians.
+	// A possible optimization is to save all course coords in radians right away.
+    function dist(lat1, lon1, lat2, lon2) {
+		var x = deg2rad((lon2 - lon1)) * Math.cos(deg2rad( (lat1 + lat2) / 2));
+		var y = deg2rad(lat2 - lat1);
+		var distance = Math.sqrt(x * x + y * y) * R;
+		return distance.format("%d");
+    }
+    
+    var d2r = (Math.PI / 180.0);
+    
+	function deg2rad(deg) {
+	  return deg * d2r;
+	}
 }
